@@ -1,5 +1,11 @@
-loadstring(game:HttpGet("https://raw.githubusercontent.com/HAPPY-script/SHADER/refs/heads/main/SHADER"))()
+-- Tải và chạy cả hai script một cách tuần tự
+local function runScripts()
+    -- Chạy script shader
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/HAPPY-script/SHADER/refs/heads/main/SHADER"))()
+    
+    -- Chạy script escape
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/HAPPY-script/ESCAPE_up_normal/refs/heads/main/ESCAPE_up_normal"))()
+end
 
-wait(2)
-
-loadstring(game:HttpGet("https://raw.githubusercontent.com/HAPPY-script/ESCAPE_up_normal/refs/heads/main/ESCAPE_up_normal"))()
+-- Thực thi hàm để chạy cả hai script
+runScripts()
