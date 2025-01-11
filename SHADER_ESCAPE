@@ -1,10 +1,23 @@
--- Tải và chạy cả hai script một cách tuần tự
+-- Tải và chạy cả hai script một cách tuần tự với thời gian chờ để đảm bảo chúng được tải đầy đủ
 local function runScripts()
     -- Chạy script shader
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/HAPPY-script/SHADER/refs/heads/main/SHADER"))()
+    local success1, err1 = pcall(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/HAPPY-script/SHADER/refs/heads/main/SHADER"))()
+    end)
+    if not success1 then
+        warn("Script Shader không chạy được: " .. err1)
+    end
     
+    -- Đợi một chút để script đầu tiên tải xong
+    task.wait(2) -- Thời gian chờ 2 giây để script đầu tiên được thực thi hoàn toàn
+
     -- Chạy script escape
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/HAPPY-script/ESCAPE_up_normal/refs/heads/main/ESCAPE_up_normal"))()
+    local success2, err2 = pcall(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/HAPPY-script/ESCAPE_up_normal/refs/heads/main/ESCAPE_up_normal"))()
+    end)
+    if not success2 then
+        warn("Script Escape không chạy được: " .. err2)
+    end
 end
 
 -- Thực thi hàm để chạy cả hai script
