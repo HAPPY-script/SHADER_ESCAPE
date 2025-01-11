@@ -1,24 +1,111 @@
--- Tải và chạy cả hai script một cách tuần tự với thời gian chờ để đảm bảo chúng được tải đầy đủ
-local function runScripts()
-    -- Chạy script shader
-    local success1, err1 = pcall(function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/HAPPY-script/SHADER/refs/heads/main/SHADER"))()
-    end)
-    if not success1 then
-        warn("Script Shader không chạy được: " .. err1)
-    end
-    
-    -- Đợi một chút để script đầu tiên tải xong
-    task.wait(2) -- Thời gian chờ 2 giây để script đầu tiên được thực thi hoàn toàn
+game.StarterGui:SetCore("SendNotification", {
+    Title = "Create by HAPPY script";
+    Text = "Loading shader, pls wait 30s-60s ✨";
+    Duration = 30;
+})
 
-    -- Chạy script escape
-    local success2, err2 = pcall(function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/HAPPY-script/ESCAPE_up_normal/refs/heads/main/ESCAPE_up_normal"))()
-    end)
-    if not success2 then
-        warn("Script Escape không chạy được: " .. err2)
+wait(35)
+
+-- Tạo ánh sáng môi trường (Environmental Light)
+local function createEnvironmentLight()
+    -- Loại bỏ ánh sáng cũ (nếu có)
+    local existingLight = workspace:FindFirstChild("ShaderLight")
+    if existingLight then
+        existingLight:Destroy()
+    end
+
+    -- Tạo một Part để gắn ánh sáng
+    local part = Instance.new("Part")
+    part.Size = Vector3.new(1, 1, 1)  -- Kích thước nhỏ
+    part.Position = Vector3.new(0, 50, 0)  -- Vị trí của Part (có thể thay đổi)
+    part.Anchored = true
+    part.Parent = workspace  -- Thêm vào workspace
+
+    -- Tạo attachment và gắn vào Part
+    local attachment = Instance.new("Attachment")
+    attachment.Parent = part
+
+    -- Thêm ánh sáng vào Attachment
+    local light = Instance.new("PointLight")
+    light.Name = "ShaderLight"
+    light.Parent = attachment
+    light.Brightness = 1.2 -- Độ sáng giảm để ánh sáng dịu hơn
+    light.Range = 150 -- Mở rộng phạm vi
+    light.Color = Color3.fromRGB(255, 255, 220) -- Màu vàng nhạt
+end
+
+-- Tăng cường hiệu ứng phản chiếu trên tất cả các đối tượng
+local function enhanceReflectance()
+    local updated = false -- Biến kiểm tra xem có đối tượng nào cần cập nhật không
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        -- Kiểm tra các đối tượng có thể phản chiếu
+        if obj:IsA("BasePart") or obj:IsA("MeshPart") or obj:IsA("UnionOperation") then
+            -- Đặt lại Reflectance thay vì cộng dồn
+            if obj.Reflectance < 1 then
+                obj.Reflectance = 0.2 -- Cố định giá trị phản chiếu vừa phải
+                updated = true
+            end
+        elseif obj:IsA("Decal") or obj:IsA("Texture") then
+            obj.Transparency = 0.3 -- Làm sáng các decal và texture (nếu có)
+        end
+    end
+
+    return updated -- Trả về xem có cập nhật gì không
+end
+
+-- Tạo hiệu ứng Bloom (ánh sáng lan tỏa)
+local function createBloomEffect()
+    local bloom = game.Lighting:FindFirstChild("BloomEffect") or Instance.new("BloomEffect")
+    bloom.Parent = game.Lighting
+    bloom.Intensity = 0.7 -- Độ sáng giảm để không quá chói
+    bloom.Threshold = 1 -- Chỉ áp dụng với vùng sáng mạnh
+    bloom.Size = 15 -- Kích thước ánh sáng lan tỏa
+end
+
+-- Tạo hiệu ứng Blur (mờ nhẹ môi trường)
+local function createBlurEffect()
+    local blur = game.Lighting:FindFirstChild("BlurEffect") or Instance.new("BlurEffect")
+    blur.Parent = game.Lighting
+    blur.Size = 2 -- Mức độ mờ giảm nhẹ
+end
+
+-- Cập nhật hiệu ứng liên tục và kiểm tra khi có sự thay đổi
+local function updateEffects()
+    local debounce = false -- Cơ chế debounce để tránh cập nhật quá nhanh
+
+    -- Cập nhật hiệu ứng mỗi 2 giây
+    while true do
+        if not debounce then
+            debounce = true  -- Đảm bảo không cập nhật quá nhanh
+
+            -- Tăng cường phản chiếu và kiểm tra xem có thay đổi không
+            local updated = enhanceReflectance()
+
+            -- Nếu có thay đổi, thì áp dụng lại các hiệu ứng khác
+            if updated then
+                createBloomEffect()
+                createBlurEffect()
+            end
+
+            -- Chờ 2 giây trước khi cập nhật lại
+            task.wait(2)
+            debounce = false
+        else
+            task.wait(0.1)  -- Chờ 0.1 giây để tránh quá tải
+        end
     end
 end
 
--- Thực thi hàm để chạy cả hai script
-runScripts()
+-- Chạy tất cả các hiệu ứng shader
+local function applyShader()
+    createEnvironmentLight()
+    updateEffects()  -- Bắt đầu vòng lặp cập nhật hiệu ứng liên tục
+end
+
+-- Áp dụng shader
+applyShader()
+print("Shader đã được áp dụng thành công!")
+
+wait(3)
+-- Tải script escape
+loadAndRun("https://raw.githubusercontent.com/HAPPY-script/ESCAPE_up_normal/refs/heads/main/ESCAPE_up_normal")
